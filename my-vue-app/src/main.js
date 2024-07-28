@@ -7,8 +7,11 @@ import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 import "@/api/mock";
+import api from "@/api/api";
 const pinia = createPinia();
 const app = createApp(App);
+
+app.config.globalProperties.$api = api;
 app.use(ElementPlus);
 app.use(pinia);
 app.use(router).mount("#app");

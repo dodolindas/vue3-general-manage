@@ -1,37 +1,37 @@
 <script setup>
-import { ref } from "vue";
+import { ref, getCurrentInstance, onMounted } from "vue";
 import axios from "axios";
+const { proxy } = getCurrentInstance();
 const getImageUrl = (user) => {
   return new URL(`../assets/images/${user}.png`, import.meta.url).href;
 };
-const tableData = ref([
-  {
-    name: "Java",
-    todayBuy: 100,
-    monthBuy: 200,
-    totalBuy: 300,
-  },
-  {
-    name: "Python",
-    todayBuy: 100,
-    monthBuy: 200,
-    totalBuy: 300,
-  },
-]);
-
+const tableData = ref([]);
+const countData = ref([]);
+const chartData = ref([]);
 const tableLabel = ref({
   name: "课程",
   todayBuy: "今日购买",
   monthBuy: "本月购买",
   totalBuy: "总购买",
 });
-axios({ url: "/api/home/getTableData", method: "get" }).then((res) => {
-  console.log(res.data);
-
-  if (res.data.code === 200) {
-    console.log(res.data.data.tableData);
-    tableData.value = res.data.data.tableData;
-  }
+const getTableData = async () => {
+  const data = await proxy.$api.getTableData();
+  tableData.value = data.tableData;
+};
+const getCountData = async () => {
+  const data = await proxy.$api.getCountData();
+  // console.log(data);
+  countData.value = data;
+};
+const getChartData = async () => {
+  const data = await proxy.$api.getChartData();
+  console.log(data);
+  chartData.value = data;
+};
+onMounted(() => {
+  getTableData();
+  getCountData();
+  getChartData();
 });
 </script>
 
@@ -63,6 +63,25 @@ axios({ url: "/api/home/getTableData", method: "get" }).then((res) => {
           </el-table-column>
         </el-table>
       </el-card>
+    </el-col>
+    <el-col :span="16" style="margin-top: 20px">
+      <div class="num">
+        <el-card
+          :body-style="{ display: 'flex', padding: 0 }"
+          v-for="item in countData"
+          :key="item.name"
+        >
+          <component
+            :is="item.icon"
+            class="icons"
+            :style="{ background: item.color }"
+          ></component>
+          <div class="detail">
+            <p class="num">￥{{ item.value }}</p>
+            <p class="txt">&*{{ item.name }}</p>
+          </div>
+        </el-card>
+      </div>
     </el-col>
   </el-row>
 </template>
