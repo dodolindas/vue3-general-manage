@@ -2,13 +2,14 @@
 import CommonAside from "@/components/CommonAside.vue";
 import CommonHeader from "@/components/CommonHeader.vue";
 </script>
+
 <template>
   <div class="common-layout">
     <el-container class="lay-container">
       <!-- 自定义左侧的组件 -->
       <common-aside />
       <el-container>
-        <el-header>
+        <el-header class="el-header">
           <common-header />
         </el-header>
         <el-main class="right-main"> main </el-main>
