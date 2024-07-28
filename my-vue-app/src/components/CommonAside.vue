@@ -1,7 +1,13 @@
 <template>
-  <el-aside width="180px">
-    <el-menu background-color="#545c64" text-color="#fff">
-      <h3>通用后台管理系统</h3>
+  <el-aside :width="width">
+    <el-menu
+      background-color="#545c64"
+      text-color="#fff"
+      :collapse="isCollapse"
+      :collapse-transition="false"
+    >
+      <h3 v-show="!isCollapse">通用后台管理系统</h3>
+      <h3 v-show="isCollapse">后台</h3>
       <el-menu-item
         v-for="item in noChildren"
         :index="item.path"
@@ -36,6 +42,7 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import { useAllDataStore } from "@/stores";
 
 const list = ref([
   {
@@ -84,6 +91,9 @@ const list = ref([
 
 const noChildren = computed(() => list.value.filter((item) => !item.children));
 const hasChildren = computed(() => list.value.filter((item) => item.children));
+const store = useAllDataStore();
+const isCollapse = computed(() => store.state.isCollapse);
+const width = computed(() => (store.state.isCollapse ? "64px" : "180px"));
 </script>
 
 <style lang="less" scoped>

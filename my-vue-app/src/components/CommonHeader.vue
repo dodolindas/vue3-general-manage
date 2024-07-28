@@ -1,7 +1,7 @@
 <template>
   <div class="header">
     <div class="l-content">
-      <el-button size="small">
+      <el-button size="small" @Click="handleCollapse">
         <component class="icons" is="menu"></component>
       </el-button>
       <el-breadcrumb separator="/" class="bread">
@@ -26,9 +26,13 @@
 
 <script setup>
 import { ref, computed } from "vue";
-
-const getImageUrl = () => {
+import { useAllDataStore } from "@/stores";
+const getImageUrl = (user) => {
   return new URL(`../assets/images/${2}.png`, import.meta.url).href;
+};
+const store = useAllDataStore();
+const handleCollapse = () => {
+  store.state.isCollapse = !store.state.isCollapse;
 };
 </script>
 
@@ -58,11 +62,11 @@ const getImageUrl = () => {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    // cursor: pointer !important;
+    cursor: pointer !important;
   }
 }
 :deep(.bread span) {
-  color: #333;
+  color: #fff !important;
   cursor: pointer !important;
 }
 </style>
