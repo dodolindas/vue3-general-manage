@@ -27,11 +27,20 @@ export default {
       //   mock: true,
     });
   },
-  getUserData() {
+  getUserData(data) {
     return request({
       url: "user/getUserData",
       method: "get",
       //   mock: true,
+      data,
+    });
+  },
+  deleteUser(data) {
+    return request({
+      url: "user/deleteUser",
+      method: "get",
+      //   mock: true,
+      data,
     });
   },
 };
