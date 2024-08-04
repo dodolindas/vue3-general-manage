@@ -1,6 +1,7 @@
 <script setup>
-import { ref, getCurrentInstance, onMounted, reactive } from "vue";
+import { ref, getCurrentInstance, onMounted, reactive, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { vaild } from "mockjs";
 
 const handleClick = () => {
   console.log("click");
@@ -12,7 +13,7 @@ const getUserData = async () => {
   let data = await proxy.$api.getUserData(config);
   tableData.value = data.list.map((item) => ({
     ...item,
-    sexLabel: item.sex === 1 ? "男" : "女",
+    sexLabel: item.sex === "1" ? "男" : "女",
   }));
   config.total = data.count;
 };
@@ -72,8 +73,10 @@ const handleDelete = (val) => {
   });
 };
 const action = ref("add");
-const dialogVisible = ref(true);
-const formUser = reactive({});
+const dialogVisible = ref(false);
+const formUser = reactive({
+  sex: "1",
+});
 //表单校验规则
 const rules = reactive({
   name: [{ required: true, message: "姓名是必填项", trigger: "blur" }],
@@ -92,15 +95,80 @@ const handleClose = () => {
 const handleCancel = () => {
   dialogVisible.value = false;
 };
+const handleAdd = () => {
+  dialogVisible.value = true;
+  action.value = "add";
+};
+const timeFormat = (time) => {
+  var time = new Date(time);
+  var year = time.getFullYear();
+  var month = time.getMonth() + 1;
+  var date = time.getDate();
+  function add(m) {
+    return m < 10 ? "0" + m : m;
+  }
+  return year + "-" + add(month) + "-" + add(date);
+};
+
+const onSubmit = () => {
+  //执行userForm表单的validate进行规则校验，传入一个回调函数，回调函数会接受到一个是否校验通过的变量
+  proxy.$refs["userForm"].validate(async (valid) => {
+    //如果校验成功
+    if (valid) {
+      //res用于接收添加用户或者编辑用户接口的返回值
+      let res = null;
+      //这里无论是新增或者是编辑，我们都要对这个日期进行一个格式化
+      //如果不是1997-01-02这种格式，使用timeFormat方法进行格式化
+      formUser.birth = /^\d{4}-\d{2}-\d{2}$/.test(formUser.birth)
+        ? formUser.birth
+        : timeFormat(formUser.birth);
+      //如果当前的操作是新增，则调用新增接口
+      if (action.value == "add") {
+        res = await proxy.$api.addUser(formUser);
+      } else {
+        res = await proxy.$api.editUser(formUser);
+      }
+      //如果接口调用成功
+      if (res) {
+        //关闭对话框，重置表单，重新请求用户数据
+        dialogVisible.value = false;
+        proxy.$refs["userForm"].resetFields();
+        getUserData();
+      }
+
+      //如果校验失败
+    } else {
+      ElMessage({
+        showClose: true,
+        message: "请输入正确的内容",
+        type: "error",
+      });
+    }
+  });
+};
+const handleEdit = (val) => {
+  action.value = "edit";
+  dialogVisible.value = true;
+
+  nextTick(() => {
+    //因为在第一次显示弹窗的时候form组件没有加载出来，如果直接对formUser赋值，这个值会作为form表单的初始值
+    //所以使用nextTick，赋值的操作在一个微任务中，这样就可以避免在from表单加载之前赋值
+
+    Object.assign(formUser, { ...val, sex: "" + val.sex });
+    //这里需要改变sex数据类型，是因为el-option的value有类型的校验
+  });
+};
+//在之前的onSubmit方法中增加的代码
+//如果是编辑
+
 onMounted(() => {
   getUserData();
-  handleSearch();
 });
 </script>
 
 <template>
   <div class="user-header">
-    <el-button type="primary">新增</el-button>
+    <el-button type="primary" @click="handleAdd">新增</el-button>
     <el-form :inline="true" :model="fromInline">
       <el-form-item label="请输入">
         <el-input
@@ -124,7 +192,7 @@ onMounted(() => {
       />
       <el-table-column fixed="right" label="Operations" min-width="120">
         <template #="scope">
-          <el-button type="primary" size="small" @click="handleClick">
+          <el-button type="primary" size="small" @click="handleEdit(scope.row)">
             编辑
           </el-button>
           <el-button type="danger" size="small" @click="handleDelete(scope.row)"
@@ -217,7 +285,7 @@ onMounted(() => {
     height: 500px;
   }
 }
-// .select-clearn {
-//   display: flex;
-// }
+.select-clearn {
+  display: flex;
+}
 </style>

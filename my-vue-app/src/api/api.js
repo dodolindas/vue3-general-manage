@@ -43,4 +43,20 @@ export default {
       data,
     });
   },
+  addUser(data) {
+    return request({
+      url: "user/addUser",
+      method: "post",
+      //   mock: true,
+      data,
+    });
+  },
+  editUser(data) {
+    return request({
+      url: "user/editUser",
+      method: "post",
+      //   mock: true,
+      data,
+    });
+  },
 };
