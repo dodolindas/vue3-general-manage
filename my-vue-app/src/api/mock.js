@@ -1,6 +1,7 @@
 import Mock from "mockjs";
 import homeApi from "@/api/mockData/home";
 import userApi from "@/api/mockData/user";
+import menuApi from "@/api/mockData/permisson";
 //1.拦截路径
 //2.方法
 //3.制造假数据
@@ -11,3 +12,4 @@ Mock.mock(/user\/getUserData/, "get", userApi.getUserList);
 Mock.mock(/user\/deleteUser/, "get", userApi.deleteUser);
 Mock.mock(/user\/addUser/, "post", userApi.createUser);
 Mock.mock(/user\/editUser/, "post", userApi.updateUser);
+Mock.mock(/permission\/getMenu/, "post", menuApi.getMenu);
